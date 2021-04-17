@@ -19,7 +19,7 @@ class Multas extends Migration
             $table->string('vehiculo', 255)->nullable(false);
             $table->integer('valor_permiso')->default(0);
             $table->integer('interes_y_reajuste')->default(0);
-            $table->integer('registro_de_multas_impaga')->default(0);
+            $table->integer('registro_de_multas_impagas')->default(0);
             $table->integer('subtotal')->default(0);
             $table->timestamps();
         });

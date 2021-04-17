@@ -14,5 +14,23 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    dd($router);
 });
+
+//Ver todas las multas
+$router->get('/multas', 'MultasController@index');
+
+//Crear multa
+$router->post('/multas', 'MultasController@store');
+
+//Ver datos de patente
+$router->get('/multas/{patente}', 'MultasController@show');
+
+//Pagar
+$router->patch('/multas/{patente}/pagar', 'MultasController@pay');
+
+//Multar
+$router->patch('/multas/{patente}/cursar', 'MultasController@penalize');
+
+//Actualizar
+$router->put('/multas/{patente}', 'MultasController@update');
