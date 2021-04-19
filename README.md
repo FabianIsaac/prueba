@@ -4,9 +4,13 @@
 
 1. En la raiz del proyecto ejecute el comando `composer install` desde la terminal
 
+Nota: En caso de no tener composer instalado descargarlo del sitio oficial [Composer][Composerd]
+
 2. Crear base de datos limpia y recordar el nombre
 
-3. Crear un archivo `.env` en la raiz del proyecto, debe tener los siguientes datos:
+3. Crear un archivo llamado `.env` en la raiz del proyecto, debe tener los siguientes datos:
+
+Nota: El nombre del archivo es .env sin extencion ni nada antes del punto
 
 ```
 APP_NAME=Lumen
@@ -42,3 +46,10 @@ php -S localhost:8000 -t public
 ```
 
 Nota: El primer comando crea las tablas necesarias, el segundo comando las pobla con datos y el tercer comando levanta un servidor de pruebas
+
+[Composerd]:https://getcomposer.org/download/
+
+Para verificar que el servidor este corriendo ingresaremos a http://localhost:8000/multas
+
+
+Si no funciona contactar al programador
