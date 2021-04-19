@@ -1,6 +1,6 @@
 # Prueba
 
-##Pasos para probar
+## Pasos para probar
 
 1. En la raiz del proyecto ejecute el comando `composer install` desde la terminal
 
