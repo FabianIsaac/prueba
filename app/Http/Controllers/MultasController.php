@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Multa;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+
+use App\Models\Multa;
+use App\Models\Modelo;
 
 class MultasController extends Controller
 {
@@ -24,7 +26,14 @@ class MultasController extends Controller
      */
     public function index()
     {
-        return $this->success(Multa::all());
+        //Cambio de ultimo minuto, se puede optimizar
+        $multas = Multa::all();
+        for($index = 0; $index < count($multas); $index++){
+            $modelo = Modelo::where('id', $multas[$index]->vehiculo)->first();
+            $multas[$index]->vehiculo = $modelo->vehiculo;
+        }
+
+        return $this->success($multas);
     }
 
     /**
@@ -35,14 +44,18 @@ class MultasController extends Controller
     {
         $rules = [
             'patente' => 'required|max:10|min:6',
-            'vehiculo' => 'required|max:255',
-            'valor_permiso' => 'integer|required',
+            'vehiculo' => 'required|integer',
             'interes_y_reajuste' => 'integer',
             'registro_de_multas_impagas' => 'integer',
             'subtotal' => 'integer'
         ];
-
-        $this->validate($request, $rules);
+        $messages = [
+            'required' => 'El campo :attribute es requerido.',
+            'integer' => 'El campo :attribute debe ser un valor entero.',
+            'max' => ':attribute debe tener maximo 10 caracteres.',
+            'min' => ':attribute debe tener minimo 6 caracteres.'
+        ];
+        $this->validate($request, $rules, $messages);
 
         $multa = Multa::where('patente', $request->get('patente'))->first();
         if($multa){
@@ -55,12 +68,18 @@ class MultasController extends Controller
 
         //Ajustamos los datos corrertamente
         $multa = $request->all();
+        
+        //Buscamos el valor del permiso en BD 
+        $modelo = Modelo::where('id', $multa['vehiculo'])->first();
+        $multa['valor_permiso'] = $modelo->valor_permiso;
+
         if($request->get('subtotal', 0) == 0){
             //En caso de venir sin subtotal, sumaremos los montos adeudados y los guarademos en el subtotal
-            $subtotal = $multa['interes_y_reajuste'] + $multa['registro_de_multas_impagas'];
+            $subtotal = $multa['interes_y_reajuste'] + $multa['registro_de_multas_impagas'] + $multa['valor_permiso'];
             $multa['subtotal'] = $subtotal;
         }
 
+        
         //Pasaremos a mayusculas algunos datos para tener un orden visual en BD
         $multa['patente'] = strtoupper($multa['patente']);
         $multa['vehiculo'] = strtoupper($multa['vehiculo']);
@@ -93,7 +112,11 @@ class MultasController extends Controller
         $rules = [
             'valor' => 'required|integer'
         ];
-        $this->validate($request, $rules);
+        $messages = [
+            'required' => 'El campo :attribute es requerido.',
+            'integer' => 'El campo :attribute debe ser un valor entero.',
+        ];
+        $this->validate($request, $rules, $messages);
 
         $multa = Multa::where('patente', $patente)->first();
         if(!$multa){
@@ -120,15 +143,25 @@ class MultasController extends Controller
             $multa['interes_y_reajuste'] = 0;
             $tempValue = $tempValue - $tempInteres;
         }
+        
         //Si quedo dinero pagaremos la multa impaga
+        $tempMultas = $multa['registro_de_multas_impagas'];
+        $multa['registro_de_multas_impagas'] = $multa['registro_de_multas_impagas'] - $tempValue;
+        if($multa['registro_de_multas_impagas'] <= 0){
+            $multa['registro_de_multas_impagas'] = 0;
+            $tempValue = $tempValue - $tempMultas;
+        }
+
         if($tempValue > 0){
-            $multa['registro_de_multas_impagas'] = $multa['registro_de_multas_impagas'] - $tempValue;
+            $multa['valor_permiso'] = $multa['valor_permiso'] - $tempValue;
         }
         
         //Recalculamos el subtotal
-        $multa['subtotal'] = $multa['registro_de_multas_impagas'] + $multa['interes_y_reajuste'];
+        $multa['subtotal'] = $multa['registro_de_multas_impagas'] + $multa['interes_y_reajuste'] + $multa['valor_permiso'];
         $multa->save();
         
+        $modelo = Modelo::where('id', $multa['vehiculo'])->first();
+        $multa['vehiculo'] = $modelo->vehiculo;
         return $this->success($multa);
     }
 
@@ -141,7 +174,11 @@ class MultasController extends Controller
         $rules = [
             'valor' => 'required|integer'
         ];
-        $this->validate($request, $rules);
+        $messages = [
+            'required' => 'El campo :attribute es requerido.',
+            'integer' => 'El campo :attribute debe ser un valor entero.',
+        ];
+        $this->validate($request, $rules, $messages);
 
         $multa = Multa::where('patente', $patente)->first();
         if(!$multa){
@@ -154,7 +191,7 @@ class MultasController extends Controller
 
         $multa['registro_de_multas_impagas'] = $multa['registro_de_multas_impagas'] + $request->get('valor');
 
-        $multa['subtotal'] = $multa['registro_de_multas_impagas'] + $multa['interes_y_reajuste'];
+        $multa['subtotal'] = $multa['registro_de_multas_impagas'] + $multa['interes_y_reajuste'] + $multa['valor_permiso'];
         $multa->save();
         
         return $this->success($multa);

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Multas extends Migration
+class Modelos extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,11 @@ class Multas extends Migration
      */
     public function up()
     {
-        Schema::create('multas', function (Blueprint $table) {
+        Schema::create('modelos', function (Blueprint $table) {
             $table->id();
-            $table->string('patente', 10)->nullable(false);
-            $table->integer('vehiculo')->nullable(false);
+            $table->string('vehiculo', 255)->nullable(false);
             $table->integer('valor_permiso')->default(0);
-            $table->integer('interes_y_reajuste')->default(0);
-            $table->integer('registro_de_multas_impagas')->default(0);
-            $table->integer('subtotal')->default(0);
+            
             $table->timestamps();
         });
     }

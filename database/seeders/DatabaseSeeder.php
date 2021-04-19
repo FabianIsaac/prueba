@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Database\Seeders\ModelosSeeder;
 use Database\Seeders\MultasSeeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,6 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $this->call(ModelosSeeder::class);
         $this->call(MultasSeeder::class);
     }
 }

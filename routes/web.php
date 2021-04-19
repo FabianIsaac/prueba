@@ -34,3 +34,6 @@ $router->patch('/multas/{patente}/cursar', 'MultasController@penalize');
 
 //Actualizar
 $router->put('/multas/{patente}', 'MultasController@update');
+
+//Ver todos los modelos
+$router->get('/modelos', 'ModelosController@index');
